@@ -14,6 +14,10 @@ Este es un bot de Telegram diseñado para gestionar listas de compras. Permite a
 - Repetir el proceso de agregar o eliminar productos sin necesidad de seleccionar nuevamente la lista.
 - Opción de cancelar en cualquier momento enviando `0⃣`.
 - Mensajes con emojis para una mejor experiencia de usuario.
+- Mostrar todas las listas con sus productos utilizando `/show`.
+- Posibilidad de eliminar todas las listas con `all` en el proceso de eliminación.
+- Confirmación al crear nuevas listas.
+- Comando `/help` para mostrar los comandos disponibles y su descripción.
 
 ## 🛠 Instalación
 
@@ -52,6 +56,8 @@ El bot comenzará a ejecutarse y podrás interactuar con él en Telegram.
 
 - `/add` → Inicia la secuencia de agregar productos a una lista.
 - `/del` → Inicia la secuencia para eliminar productos o listas completas.
+- `/show` → Muestra todas las listas de compras y sus productos.
+- `/help` → Muestra la lista de comandos disponibles y su función.
 
 ## 📝 Flujo de trabajo
 
@@ -71,6 +77,11 @@ El bot comenzará a ejecutarse y podrás interactuar con él en Telegram.
 5. Si el usuario elimina una lista completa, el proceso se cancela automáticamente.
 6. Si el usuario elimina un producto, se le sigue preguntando hasta que envíe `0⃣` para salir.
 
+### 🔹 **Mostrar listas y productos**
+1. El usuario ejecuta `/show`.
+2. Se muestra una lista con todas las listas de compras y sus productos.
+3. Si no hay listas creadas, se informa al usuario.
+
 ## 🛠 Tecnologías utilizadas
 
 - Python 3
@@ -78,7 +89,7 @@ El bot comenzará a ejecutarse y podrás interactuar con él en Telegram.
 
 ---
 
-🧐🛠️ ¡Nuevas funcionalidades próximamente!
+🤔🛠️ ¡Nuevas funcionalidades próximamente!
 
 💛💻 Desarrollado por Ignacio Becerra
 
