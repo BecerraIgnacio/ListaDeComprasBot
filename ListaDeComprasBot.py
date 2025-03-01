@@ -1,9 +1,8 @@
+from config import TOKEN
+from config import BOT_USEARNAME
 from typing import Final
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
-
-TOKEN: Final = '7808648733:AAFgKfU6atT3IwE0HTO2qSBsisk378htz6M'
-BOT_USEARNAME: Final = '@LisDeCom_bot'
 
 
 # Definicion ListaDeCompras

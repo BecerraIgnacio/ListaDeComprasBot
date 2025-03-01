@@ -21,15 +21,7 @@ Este es un bot de Telegram diseñado para gestionar listas de compras. Permite a
     cd ListaDeComprasBot
 ```
 
-### 2️⃣ Crear un entorno virtual (opcional pero recomendado)
-
-```sh
-    python -m venv venv
-    source venv/bin/activate  # En Linux/Mac
-    venv\Scripts\activate     # En Windows
-```
-
-### 3️⃣ Instalar dependencias
+### 2️⃣ Instalar dependencias
 
 ```sh
     pip install -r requirements.txt
@@ -37,15 +29,21 @@ Este es un bot de Telegram diseñado para gestionar listas de compras. Permite a
 
 ## 🚀 Uso
 
-### 1️⃣ Configurar el token del bot
+### 1️⃣ Configurar el token del bot de forma segura
 
-Edita el archivo `config.py` y reemplaza `TOKEN` con el token de tu bot de Telegram.
+Crea un archivo `config.py` en la raíz del proyecto y define tu token de esta manera:
+
+```python
+TOKEN = 'tu_token_aqui'
+BOT_USEARNAME = '@nombre_de_tu_bot'
+```
+
 
 ### 2️⃣ Ejecutar el bot
-
 ```sh
     python main.py
 ```
+
 
 El bot comenzará a ejecutarse y podrás interactuar con él en Telegram.
 
@@ -69,5 +67,8 @@ El bot comenzará a ejecutarse y podrás interactuar con él en Telegram.
 
 ---
 
-En desarrollo por Ignacio Becerra
+👷‍♂️ Nuevas funcionalidades proximamente!
+
+❤️💻 Desarrollado por Ignacio Becerra 
+
 
