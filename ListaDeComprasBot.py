@@ -14,15 +14,24 @@ class ListaDeCompras:
         # Diccionario para almacenar el estado de cada usuario en el bot
         self.usuario_estado = {}
 
-    async def elegir_lista(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def elegir_lista(self, update: Update, context: ContextTypes.DEFAULT_TYPE, user_id: int):
         """Solicita al usuario que ingrese el nombre de la lista de compras."""
-        user_id = update.message.from_user.id
-        print(f"Usuario {user_id} inició /add")
-        await update.message.reply_text("Ingrese el nombre de la lista a la que desea agregar productos.\n\n"
-                                        "Para crear una nueva lista, envíe un nuevo nombre.\n\n"
-                                        "Para salir, envíe '0'.")
+        await update.message.reply_text("🛒 Ingrese el nombre de la lista a la que desea agregar productos.\n\n"
+                                        "➕ Para crear una nueva lista, envíe un nuevo nombre.\n\n"
+                                        "0️⃣ Para salir, envíe '0'.")
         # Guarda el estado del usuario para esperar el nombre de la lista
         self.usuario_estado[user_id] = "esperando_lista"
+
+    async def confirmar_lista(self, update: Update, context: ContextTypes.DEFAULT_TYPE, user_id: int, text: str):
+        """Confirma si la lista existe o necesita ser creada."""
+        if text in self.listas:  # Si la lista ya existe
+            self.usuario_estado[user_id] = "agregando_producto"
+            self.usuario_estado["lista_actual"] = text
+            await self.solicitar_producto(update, context, user_id)
+        else:
+            self.usuario_estado[user_id] = "confirmando_creacion"
+            self.usuario_estado["nombre_lista"] = text
+            await update.message.reply_text(f'❓ La lista "{text}" no existe. ¿Desea crearla? (Sí/No)')
 
     async def manejar_respuesta_lista(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Maneja la respuesta del usuario cuando ingresa el nombre de la lista."""
@@ -38,60 +47,62 @@ class ListaDeCompras:
             return
 
         if self.usuario_estado.get(user_id) == "esperando_lista":
-            if text in self.listas:  # Si la lista ya existe
-                await update.message.reply_text(f"La lista '{text}' ya existe. Ingrese el producto que desea agregar.")
-                self.usuario_estado[user_id] = "agregando_producto"
-                self.usuario_estado["lista_actual"] = text
-            else:
-                # Si la lista no existe, se pide confirmación para crearla
-                self.usuario_estado[user_id] = "confirmando_creacion"
-                self.usuario_estado["nombre_lista"] = text
-                await update.message.reply_text(f'La lista "{text}" no existe. ¿Desea crearla? (Sí/No)')
-
+            await self.confirmar_lista(update, context, user_id, text)
         elif self.usuario_estado.get(user_id) == "confirmando_creacion":
-            if text.lower() in ["si", "sí"]:  # Si el usuario confirma la creación
-                lista_nombre = self.usuario_estado.get("nombre_lista")
-                self.listas[lista_nombre] = {}  # Se crea la lista como diccionario para productos y cantidades
-                print(f"Lista creada: {lista_nombre}")
-                await update.message.reply_text(
-                    f"Lista '{lista_nombre}' creada exitosamente. Ingrese el producto que desea agregar.")
-                self.usuario_estado[user_id] = "agregando_producto"
-                self.usuario_estado["lista_actual"] = lista_nombre
-            elif text.lower() == "no":  # Si el usuario rechaza la creación
-                await update.message.reply_text("Ingrese nuevamente el nombre de la lista.")
-                self.usuario_estado[user_id] = "esperando_lista"  # Se vuelve a pedir la lista
-            else:
-                await update.message.reply_text("Por favor, responda con 'Sí' o 'No'.")
-
+            await self.crear_lista(update, context, user_id, text)
         elif self.usuario_estado.get(user_id) == "agregando_producto":
-            lista_actual = self.usuario_estado.get("lista_actual")
-            if lista_actual:
-                print(f"Producto recibido para lista '{lista_actual}': {text}")
-                self.usuario_estado[user_id] = "esperando_cantidad"
-                self.usuario_estado["producto_actual"] = text
-                await update.message.reply_text(f"Ingrese la cantidad para '{text}'.")
-
+            await self.solicitar_cantidad(update, context, user_id, text)
         elif self.usuario_estado.get(user_id) == "esperando_cantidad":
-            lista_actual = self.usuario_estado.get("lista_actual")
-            producto_actual = self.usuario_estado.get("producto_actual")
+            await self.agregar_cantidad(update, context, user_id, text)
 
-            try:
-                cantidad = int(text)
-                if cantidad <= 0:
-                    await update.message.reply_text("Ingrese un número mayor a 0.")
-                    return
+    async def crear_lista(self, update: Update, context: ContextTypes.DEFAULT_TYPE, user_id: int, text: str):
+        """Crea una nueva lista si el usuario confirma."""
+        if text.lower() in ["si", "sí"]:
+            lista_nombre = self.usuario_estado.get("nombre_lista")
+            self.listas[lista_nombre] = {}  # Se crea la lista como diccionario para productos y cantidades
+            print(f"Lista creada: {lista_nombre}")
+            self.usuario_estado[user_id] = "agregando_producto"
+            self.usuario_estado["lista_actual"] = lista_nombre
+            await update.message.reply_text(f"✅ Lista '{lista_nombre.capitalize()}' creada exitosamente.")
+            await self.solicitar_producto(update, context, user_id)
+        elif text.lower() == "no":
+            await update.message.reply_text("📝 Ingrese nuevamente el nombre de la lista.")
+            self.usuario_estado[user_id] = "esperando_lista"
+        else:
+            await update.message.reply_text("❌ Por favor, responda con 'Sí' o 'No'.")
 
-                if producto_actual in self.listas[lista_actual]:
-                    self.listas[lista_actual][producto_actual] += cantidad
-                else:
-                    self.listas[lista_actual][producto_actual] = cantidad
+    async def solicitar_producto(self, update: Update, context: ContextTypes.DEFAULT_TYPE, user_id: int):
+        """Solicita al usuario que ingrese el nombre del producto."""
+        await update.message.reply_text("📦 Ingrese el producto que desea agregar.\n0️⃣ Para salir, envíe '0'.")
+        self.usuario_estado[user_id] = "agregando_producto"
 
-                print(f"Producto agregado: {producto_actual} ({cantidad}) en la lista '{lista_actual}'")
-                await update.message.reply_text(
-                    f"Se añadieron {cantidad} unidades de '{producto_actual}' a la lista '{lista_actual}'.")
-                self.usuario_estado.pop(user_id, None)  # Se elimina el estado del usuario
-            except ValueError:
-                await update.message.reply_text("Por favor, ingrese un número válido.")
+    async def solicitar_cantidad(self, update: Update, context: ContextTypes.DEFAULT_TYPE, user_id: int, text: str):
+        """Solicita la cantidad del producto ingresado."""
+        lista_actual = self.usuario_estado.get("lista_actual")
+        if lista_actual:
+            print(f"Producto recibido para lista '{lista_actual}': {text}")
+            self.usuario_estado[user_id] = "esperando_cantidad"
+            self.usuario_estado["producto_actual"] = text
+            await update.message.reply_text(f"🔢 Ingrese la cantidad para '{text.capitalize()}'.")
+
+    async def agregar_cantidad(self, update: Update, context: ContextTypes.DEFAULT_TYPE, user_id: int, text: str):
+        """Agrega la cantidad ingresada al producto correspondiente y vuelve a solicitar otro producto."""
+        lista_actual = self.usuario_estado.get("lista_actual")
+        producto_actual = self.usuario_estado.get("producto_actual")
+        try:
+            cantidad = int(text)
+            if cantidad <= 0:
+                await update.message.reply_text("⬆️ Ingrese un número mayor a 0.")
+                return
+            if producto_actual in self.listas[lista_actual]:
+                self.listas[lista_actual][producto_actual] += cantidad
+            else:
+                self.listas[lista_actual][producto_actual] = cantidad
+            print(f"Producto agregado: {producto_actual} ({cantidad}) en la lista '{lista_actual}'")
+            await update.message.reply_text(f"✅ Se añadieron {cantidad} unidades de '{producto_actual.capitalize()}' a la lista '{lista_actual.capitalize()}'.")
+            await self.solicitar_producto(update, context, user_id)  # Volver a pedir otro producto
+        except ValueError:
+            await update.message.reply_text("❌ Por favor, ingrese un número válido.")
 
 
 # Instancia global de lista de compras
@@ -100,19 +111,14 @@ lista_compras = ListaDeCompras()
 
 async def add_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Maneja el comando /add e inicia el proceso de selección de lista."""
-    await lista_compras.elegir_lista(update, context)
-
-
+    user_id = update.message.from_user.id
+    print(f"Usuario {user_id} inició /add")
+    await lista_compras.elegir_lista(update, context, user_id)
 
 
 if __name__ == '__main__':
-    """Función principal que inicializa el bot."""
     print('Starting lista de compras')
     app = Application.builder().token(TOKEN).build()
-
-    # Agrega el manejador para el comando /add
     app.add_handler(CommandHandler('add', add_command))
-    # Manejador para recibir las respuestas del usuario en la secuencia de listas y productos
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, lista_compras.manejar_respuesta_lista))
-
-    app.run_polling(poll_interval=3)  # Inicia el bot en modo polling
+    app.run_polling(poll_interval=3)
