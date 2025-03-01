@@ -16,6 +16,7 @@ class ListaDeCompras:
             "➕ Para crear una nueva lista, envíe un nuevo nombre.\n\n"
             "0️⃣ Para salir, envíe '0'."
         )
+        await self.enviar_listas(update, user_id)
         self.usuario_estado[user_id] = "esperando_lista_agregar"
 
     async def iniciar_eliminar_producto(self, update: Update, context: ContextTypes.DEFAULT_TYPE, user_id: int):
@@ -25,6 +26,7 @@ class ListaDeCompras:
             "Escriba 'all' para eliminar todas las listas.\n"
             "0️⃣ Para salir, envíe '0'."
         )
+        await self.enviar_listas(update, user_id)
         self.usuario_estado[user_id] = "esperando_lista_eliminar"
 
     async def procesar_lista_agregar(self, update: Update, user_id: int, text: str):
@@ -86,6 +88,7 @@ class ListaDeCompras:
             "Escriba 'all' para eliminar la lista completa.\n"
             "0️⃣ Para salir, envíe '0'."
         )
+        await self.enviar_productos(update, user_id)
 
     async def agregar_producto(self, update: Update, user_id: int, text: str):
         """Guarda el nombre del producto y solicita la cantidad."""
@@ -98,14 +101,21 @@ class ListaDeCompras:
         """Guarda la cantidad ingresada y confirma la acción."""
         lista_actual = self.usuario_estado.get("lista_actual")
         producto_actual = self.usuario_estado.get("producto_actual")
-
         try:
             cantidad = int(text)
             if cantidad <= 0:
                 await update.message.reply_text("⬆️ Ingrese un número mayor a 0.")
                 return
-            self.listas[lista_actual][producto_actual] = cantidad
+            if lista_actual not in self.listas:
+                self.listas[lista_actual] = {}  # Crear la lista si no existe
+
+            if producto_actual in self.listas[lista_actual]:
+                self.listas[lista_actual][producto_actual] += cantidad  # Sumar si ya existe
+            else:
+                self.listas[lista_actual][producto_actual] = cantidad  # Crear si no existe
+
             await update.message.reply_text(f"✅ Se añadieron {cantidad} unidades de '{producto_actual.capitalize()}' a la lista '{lista_actual.capitalize()}'.")
+            await self.enviar_productos(update, user_id)
             await self.solicitar_producto(update, user_id)
         except ValueError:
             await update.message.reply_text("❌ Por favor, ingrese un número válido.")
@@ -122,6 +132,7 @@ class ListaDeCompras:
         elif text in self.listas[lista_actual]:
             del self.listas[lista_actual][text]
             await update.message.reply_text(f"✅ '{text.capitalize()}' ha sido eliminado de la lista '{lista_actual.capitalize()}'.")
+            await self.enviar_productos(update, user_id)
         else:
             await update.message.reply_text(f"⚠️ '{text.capitalize()}' no se encuentra en la lista '{lista_actual.capitalize()}'.")
         await self.solicitar_producto_eliminar(update, user_id)
@@ -152,6 +163,41 @@ class ListaDeCompras:
         elif estado == "esperando_producto_eliminar":
             await self.eliminar_producto(update, user_id, text)
 
+    async def enviar_listas(self, update: Update, user_id: int):
+        if self.listas:
+            texto = "📖 Listas existentes:\n"
+            for lista in self.listas:
+                texto += f"   🔸 {lista.capitalize()}\n"
+            await update.message.reply_text(texto)
+            return
+        await update.message.reply_text("🧐 Todavia no tienes ninguna lista.")
+        return
+
+    async def enviar_productos(self, update: Update, user_id: int):
+        lista_actual = self.usuario_estado.get("lista_actual")
+        if self.listas[lista_actual]:
+            texto = f"📄 {lista_actual.capitalize()}:\n"
+            for producto in self.listas[lista_actual]:
+                texto += f"   🔸 {producto.capitalize()}: {self.listas[lista_actual][producto]}\n"
+            await update.message.reply_text(texto)
+            return
+        await update.message.reply_text(f"🧐 Lista {lista_actual.capitalize()} vacia.")
+        return
+
+    async def enviar_todo(self, update: Update, user_id: int):
+        if self.listas:
+            texto = "🔻 Listas existentes:\n"
+            texto += "\n"
+            for lista in self.listas:
+                texto += f"📄 {lista.capitalize()}:\n"
+                for producto in self.listas[lista]:
+                    texto += f"   🔸 {producto.capitalize()}: {self.listas[lista][producto]}\n"
+                texto += "\n"
+            await update.message.reply_text(texto)
+            return
+        await update.message.reply_text(f"😅 No tienes ninguna lista.")
+        return
+
 
 
 # Instancia global de lista de compras
@@ -170,11 +216,27 @@ async def del_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f"Usuario {user_id} inició /del")
     await lista_compras.iniciar_eliminar_producto(update, context, user_id)
 
+async def show_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Maneja el comando /add e inicia el proceso de selección de lista."""
+    user_id = update.message.from_user.id
+    print(f"Usuario {user_id} inició /del")
+    await lista_compras.enviar_todo(update, context)
+
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        await update.message.reply_text(f"🛍️ Bienvenido a la lista de compras! 🛍️\n\n"
+                                        f"Los comandos disponibilidos son:\n\n"
+                                        f"➕ /add - Usa este comando para agregar listas y productos.\n"
+                                        f"🗑️ /del - Usa este comando para eliminar listas y productos.\n"
+                                        f"📜 /show - Usa este comando para ver tus listas.\n")
+        return
 
 if __name__ == '__main__':
     print('Starting lista de compras')
+    update = Update
     app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler('help', help_command))
     app.add_handler(CommandHandler('add', add_command))
+    app.add_handler(CommandHandler('show', show_command))
     app.add_handler(CommandHandler('del', del_command))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, lista_compras.message_handler))
-    app.run_polling(poll_interval=3)
+    app.run_polling(poll_interval=1)
