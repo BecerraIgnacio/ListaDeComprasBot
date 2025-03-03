@@ -1,3 +1,4 @@
+import json
 from config import TOKEN
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
@@ -5,9 +6,30 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 
 # Definición de la clase ListaDeCompras
 class ListaDeCompras:
-    def __init__(self):
+    def __init__(self, archivo="listas.json"):
         self.listas = {}  # Diccionario para almacenar listas de compras
         self.usuario_estado = {}  # Diccionario para almacenar estados de usuarios
+        self.archivo = archivo
+        self.cargar_listas()
+
+    def cargar_listas(self):
+        try:
+            with open(self.archivo, "r", encoding="utf-8") as archivo:
+                self.listas = json.load(archivo)
+            print("Listas cargadas")
+        except FileNotFoundError:
+            print("Listas no existe")
+        except json.JSONDecodeError:
+            print("No se pudo leer el archivo")
+
+    def guardar_listas(self):
+        try:
+            with open(self.archivo, "w", encoding="utf-8") as archivo:
+                json.dump(self.listas, archivo, indent=4)
+            print("Listas guardadas")
+        except Exception as e:
+            print(f"Error al guardar listas: {e}")
+
 
     async def iniciar_agregar_producto(self, update: Update, context: ContextTypes.DEFAULT_TYPE, user_id: int):
         """Inicia el proceso de agregar un producto solicitando la lista."""
@@ -113,7 +135,6 @@ class ListaDeCompras:
                 self.listas[lista_actual][producto_actual] += cantidad  # Sumar si ya existe
             else:
                 self.listas[lista_actual][producto_actual] = cantidad  # Crear si no existe
-
             await update.message.reply_text(f"✅ Se añadieron {cantidad} unidades de '{producto_actual.capitalize()}' a la lista '{lista_actual.capitalize()}'.")
             await self.enviar_productos(update, user_id)
             await self.solicitar_producto(update, user_id)
@@ -158,10 +179,14 @@ class ListaDeCompras:
             await self.agregar_producto(update, user_id, text)
         elif estado == "esperando_cantidad":
             await self.confirmar_cantidad(update, user_id, text)
+            lista_compras.guardar_listas()
         elif estado == "esperando_lista_eliminar":
             await self.procesar_lista_eliminar(update, user_id, text)
+            lista_compras.guardar_listas()
         elif estado == "esperando_producto_eliminar":
             await self.eliminar_producto(update, user_id, text)
+            lista_compras.guardar_listas()
+
 
     async def enviar_listas(self, update: Update, user_id: int):
         if self.listas:
