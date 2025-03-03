@@ -12,12 +12,13 @@ Este es un bot de Telegram diseñado para gestionar listas de compras. Permite a
 - Eliminar productos individuales de una lista.
 - Eliminar una lista completa de compras.
 - Repetir el proceso de agregar o eliminar productos sin necesidad de seleccionar nuevamente la lista.
-- Opción de cancelar en cualquier momento enviando `0⃣`.
+- Opción de cancelar en cualquier momento enviando 0️⃣.
 - Mensajes con emojis para una mejor experiencia de usuario.
-- Mostrar todas las listas con sus productos utilizando `/show`.
-- Posibilidad de eliminar todas las listas con `all` en el proceso de eliminación.
+- Mostrar todas las listas con sus productos utilizando /show.
+- Posibilidad de eliminar todas las listas con all en el proceso de eliminación.
 - Confirmación al crear nuevas listas.
-- Comando `/help` para mostrar los comandos disponibles y su descripción.
+- Comando /help para mostrar los comandos disponibles y su descripción.
+- **Carga y descarga automática de listas de compras en un archivo JSON.**
 
 ## 🛠 Instalación
 
@@ -46,6 +47,7 @@ BOT_USERNAME = '@nombre_de_tu_bot'
 ```
 
 ### 2️⃣ Ejecutar el bot
+
 ```sh
 python main.py
 ```
@@ -67,7 +69,8 @@ El bot comenzará a ejecutarse y podrás interactuar con él en Telegram.
 3. Si la lista no existe, se pregunta si desea crearla.
 4. Se solicita el nombre del producto.
 5. Se solicita la cantidad del producto.
-6. Se repite el proceso hasta que el usuario envíe `0⃣` para salir.
+6. Se repite el proceso hasta que el usuario envíe `0️⃣` para salir.
+7. **La lista de compras se guarda automáticamente en `listas.json` después de cada modificación.**
 
 ### 🔹 **Eliminar productos o listas**
 1. El usuario ejecuta `/del`.
@@ -75,17 +78,23 @@ El bot comenzará a ejecutarse y podrás interactuar con él en Telegram.
 3. Si la lista no existe, se muestra un mensaje de error.
 4. Se solicita el nombre del producto a eliminar o se ofrece la opción de eliminar toda la lista enviando `all`.
 5. Si el usuario elimina una lista completa, el proceso se cancela automáticamente.
-6. Si el usuario elimina un producto, se le sigue preguntando hasta que envíe `0⃣` para salir.
+6. Si el usuario elimina un producto, se le sigue preguntando hasta que envíe `0️⃣` para salir.
+7. **La lista de compras se guarda automáticamente en `listas.json` después de cada modificación.**
 
 ### 🔹 **Mostrar listas y productos**
 1. El usuario ejecuta `/show`.
 2. Se muestra una lista con todas las listas de compras y sus productos.
 3. Si no hay listas creadas, se informa al usuario.
 
+## 📂 Carga y descarga de listas
+
+El bot carga automáticamente las listas de compras desde el archivo `listas.json` al iniciarse y guarda cualquier cambio en el mismo archivo después de cada modificación. Esto permite que las listas sean persistentes incluso después de reiniciar el bot.
+
 ## 🛠 Tecnologías utilizadas
 
 - Python 3
 - `python-telegram-bot`
+- JSON para almacenamiento de datos
 
 ---
 
