@@ -6,19 +6,20 @@ Este es un bot de Telegram diseñado para gestionar listas de compras. Permite a
 
 ## 🚀 Características
 
+- Cada usuario tiene su propio almacenamiento de listas, **sin acceso a listas de otros usuarios**.
 - Crear nuevas listas de compras.
 - Agregar productos a listas existentes.
 - Especificar la cantidad de cada producto.
 - Eliminar productos individuales de una lista.
 - Eliminar una lista completa de compras.
+- Eliminar todas las listas de compras de un usuario con `all`.
 - Repetir el proceso de agregar o eliminar productos sin necesidad de seleccionar nuevamente la lista.
-- Opción de cancelar en cualquier momento enviando 0️⃣.
+- Opción de cancelar en cualquier momento enviando `0️⃣`.
 - Mensajes con emojis para una mejor experiencia de usuario.
-- Mostrar todas las listas con sus productos utilizando /show.
-- Posibilidad de eliminar todas las listas con all en el proceso de eliminación.
+- Mostrar todas las listas con sus productos utilizando `/show`.
 - Confirmación al crear nuevas listas.
-- Comando /help para mostrar los comandos disponibles y su descripción.
-- **Carga y descarga automática de listas de compras en un archivo JSON.**
+- Comando `/help` para mostrar los comandos disponibles y su descripción.
+- **Carga y descarga automática de listas de compras en un archivo JSON, asegurando la persistencia de datos**.
 
 ## 🛠 Instalación
 
@@ -86,9 +87,12 @@ El bot comenzará a ejecutarse y podrás interactuar con él en Telegram.
 2. Se muestra una lista con todas las listas de compras y sus productos.
 3. Si no hay listas creadas, se informa al usuario.
 
-## 📂 Carga y descarga de listas
+## 💻 Carga y descarga de listas
 
-El bot carga automáticamente las listas de compras desde el archivo `listas.json` al iniciarse y guarda cualquier cambio en el mismo archivo después de cada modificación. Esto permite que las listas sean persistentes incluso después de reiniciar el bot.
+- **Cada usuario tiene su propio almacenamiento de listas separado**.
+- El bot carga automáticamente las listas de compras desde el archivo `listas.json` al iniciarse y guarda cualquier cambio en el mismo archivo después de cada modificación.
+- Se usa el **ID del usuario como clave única** para identificar sus listas y evitar que otros usuarios puedan acceder a ellas.
+- **Los datos son persistentes**, incluso después de reiniciar el bot.
 
 ## 🛠 Tecnologías utilizadas
 
@@ -98,7 +102,6 @@ El bot carga automáticamente las listas de compras desde el archivo `listas.jso
 
 ---
 
-🤔🛠️ ¡Nuevas funcionalidades próximamente!
+🤔🛠 ¡Nuevas funcionalidades próximamente!
 
 💛💻 Desarrollado por Ignacio Becerra
-
