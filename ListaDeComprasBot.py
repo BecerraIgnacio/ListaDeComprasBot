@@ -37,7 +37,6 @@ class ListaDeCompras:
 
     def guardar_listas(self):
         try:
-            print("Guardando listas en JSON:", self.listas)
             if not self.listas:
                 with open(self.archivo, "w", encoding="utf-8") as archivo:
                     json.dump({}, archivo, indent=4)
@@ -227,6 +226,8 @@ class ListaDeCompras:
         user_id = str(update.message.from_user.id)
         text = update.message.text.strip().lower()
 
+        print("User: ", user_id, " sent: ", text)
+
         if text == "0":
             await update.message.reply_text("Operación cancelada.")
             self.usuario_estado.pop(user_id, None)
@@ -259,24 +260,26 @@ lista_compras = ListaDeCompras()
 async def add_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Maneja el comando /add e inicia el proceso de selección de lista."""
     user_id = str(update.message.from_user.id)
-    print(f"Usuario {user_id} inició /add")
+    print("User: ", user_id, " sent: /add")
     await lista_compras.iniciar_agregar_producto(update, context, user_id)
 
 async def del_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Maneja el comando /add e inicia el proceso de selección de lista."""
     user_id = str(update.message.from_user.id)
-    print(f"Usuario {user_id} inició /del")
+    print("User: ", user_id, " sent: /del")
     await lista_compras.iniciar_eliminar_producto(update, context, user_id)
 
 async def show_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Maneja el comando /add e inicia el proceso de selección de lista."""
     user_id = str(update.message.from_user.id)
-    print(f"Usuario {user_id} inició /show")
+    print("User: ", user_id, " sent: /show")
     await lista_compras.enviar_todo(update, user_id)
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        user_id = str(update.message.from_user.id)
+        print("User: ", user_id, " sent: /help")
         await update.message.reply_text(f"🛍️ Bienvenido a la lista de compras! 🛍️\n\n"
-                                        f"Los comandos disponibilidos son:\n\n"
+                                        f"Los comandos disponibles son:\n\n"
                                         f"➕ /add - Usa este comando para agregar listas y productos.\n"
                                         f"🗑️ /del - Usa este comando para eliminar listas y productos.\n"
                                         f"📜 /show - Usa este comando para ver tus listas.\n")

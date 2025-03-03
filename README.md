@@ -2,8 +2,6 @@
 
 Este es un bot de Telegram diseñado para gestionar listas de compras. Permite a los usuarios crear listas, agregar y eliminar productos, y especificar cantidades de manera interactiva y fácil de usar.
 
-## ⚠️ Este proyecto está en desarrollo y puede estar sujeto a cambios. ⚠️
-
 ## 🚀 Características
 
 - Cada usuario tiene su propio almacenamiento de listas, **sin acceso a listas de otros usuarios**.
@@ -101,7 +99,5 @@ El bot comenzará a ejecutarse y podrás interactuar con él en Telegram.
 - JSON para almacenamiento de datos
 
 ---
-
-🤔🛠 ¡Nuevas funcionalidades próximamente!
 
 💛💻 Desarrollado por Ignacio Becerra
